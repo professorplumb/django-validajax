@@ -11,14 +11,20 @@ from .registration import KeyNotFound
 
 
 class FieldValidationView(View):
-    def make_response(self, dct, status=200):
+    def _make_response(self, dct, status=200):
         return HttpResponse(json.dumps(dct), content_type='application/json', status=status)
 
-    def make_failure_response(self, message):
-        return self.make_response({'success': False, 'message': message})
+    def _make_failure_response(self, message):
+        return self._make_response({'success': False, 'message': message})
 
-    def make_error_response(self, message, status=500):
-        return self.make_response({'success': False, 'message': message}, status=status)
+    def _make_error_response(self, message, status=500):
+        return self._make_response({'success': False, 'message': message}, status=status)
+
+    def _make_success_response(self, message):
+        resp = {'success': True}
+        if message is not None:
+            resp['message'] = message
+        return self._make_response(resp)
 
     def get(self, *args, **kwargs):
         form_key = self.kwargs['form_key']
@@ -29,11 +35,8 @@ class FieldValidationView(View):
             cleaned_value = getattr(form_obj, 'clean_{}'.format(field_name))()
             response_message = form_registry.get_response_message(form_obj, field_name, cleaned_value)
         except KeyNotFound as e:
-            return self.make_error_response(e.message)
+            return self._make_error_response(e.message)
         except ValidationError as e:
-            return self.make_failure_response(e.message)
-
-        resp = {'success': True}
-        if response_message is not None:
-            resp['message'] = response_message
-        return self.make_response(resp)
+            return self._make_failure_response(e.message)
+        else:
+            return self._make_success_response(response_message)

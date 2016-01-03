@@ -1,7 +1,5 @@
 from .registration import FormRegistry
 
-from . import settings
-
 __version__ = '0.0.1'
 
 default_app_config = 'django_validajax.apps.DjangoValidAJAXAppConfig'
