@@ -34,11 +34,18 @@ class FormRegistry(object):
             return
 
         if namespace is None:
-            namespace = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(10))
+            namespace = self._determine_namespace_from_form_class(form_class)
         logger.info("Registering %s as namespace %s", form_class, namespace)
         self._key_registry[namespace] = form_class
         self._class_registry[form_class] = (namespace, autoregistered)
         self._response_registry[form_class] = success_message
+
+    @staticmethod
+    def _determine_namespace_from_form_class(form_class):
+        try:
+            return getattr(form_class, 'validajax_namespace')
+        except AttributeError:
+            return ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(10))
 
     def get_form_class_from_namespace(self, namespace):
         try:
@@ -60,6 +67,9 @@ class FormRegistry(object):
     def get_response_message(self, form, field_name, cleaned_value):
         form_class = form if inspect.isclass(form) else form.__class__
         response_obj = self._response_registry.get(form_class)
+        if not response_obj:
+            response_obj = getattr(form_class, 'validajax_success_callback', None)
+
         if not response_obj:
             return None
         elif response_obj is True:

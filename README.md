@@ -54,6 +54,16 @@ namespace.  It takes one argument and two optional kwargs:
       form instance, field name under validation, and the value returned by `clean_{fieldname}`.  The example above
       returns the value unaltered for the `name` field, and the value reversed for the `nemesis_name` field.
 
+You can also choose to set `namespace` and `success_message` on the form class itself via the `validajax_namespace` and
+`validajax_success_message` attributes:
+
+```python
+
+class MyForm(ModelForm):
+    validajax_namespace = 'myform_namespace'
+    validajax_success_callback = success_message_func
+```
+
 ### Autoregistration
 
 If you wish, you can have Django-ValidAJAX look up and register your forms for you.  It's not all that smart: it just
