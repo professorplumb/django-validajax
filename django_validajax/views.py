@@ -36,6 +36,8 @@ class FieldValidationView(View):
             response_message = form_registry.get_response_message(form_obj, field_name, cleaned_value)
         except KeyNotFound as e:
             return self._make_error_response(e.message)
+        except AttributeError as e:
+            return self._make_error_response(e.message)
         except ValidationError as e:
             return self._make_failure_response(e.message)
         else:
